@@ -28,32 +28,59 @@ A Windows desktop application that automates monthly payslip distribution. Uploa
 ### Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/PaySlipAutomation.git
+git clone https://github.com/NVitlam/PaySlipAutomation.git
 cd PaySlipAutomation
 pip install -r requirements.txt
 ```
 
-### Google Cloud Setup
+### Google Cloud Setup (Step-by-Step)
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project (or use an existing one)
-3. Enable the **Gmail API** (APIs & Services > Library > search "Gmail API")
-4. Go to **APIs & Services > Credentials**
-5. Click **Create Credentials > OAuth 2.0 Client ID**
-6. Choose application type: **Desktop app**
-7. Copy the **Client ID** and **Client Secret**
+#### Step 1 — Create a Google Cloud Project
 
-### Running
+Go to [console.cloud.google.com](https://console.cloud.google.com/). Sign in with the Google account that will send the payslips. Click the project dropdown at the top left (next to "Google Cloud") and hit **New Project**. Give it a name like `payslip-sender`, leave organization as-is, and click **Create**. Make sure it's selected as the active project.
+
+#### Step 2 — Enable the Gmail API
+
+In the left sidebar go to **APIs & Services → Library** (or just search "Gmail API" in the top search bar). Click on **Gmail API** and hit **Enable**. Wait a few seconds for it to activate.
+
+#### Step 3 — Configure the OAuth Consent Screen
+
+Before you can create credentials, Google forces you to set up the consent screen. Go to **APIs & Services → OAuth consent screen**. Choose **External** as the user type (unless you have a Workspace org, then Internal is fine). Click **Create**.
+
+Fill in the required fields:
+- **App name** — e.g. "Payslip Sender"
+- **User support email** — your email
+- **Developer contact email** — same email at the bottom
+
+Skip the logo/links, just hit **Save and Continue**.
+
+On the **Scopes** page, click **Add or Remove Scopes**, search for `gmail.send`, check it (`https://www.googleapis.com/auth/gmail.send`), and click **Update** then **Save and Continue**.
+
+On the **Test Users** page, click **Add Users** and add the Gmail address that will send payslips. This is critical — while the app is in "Testing" mode, only listed test users can authenticate. Hit **Save and Continue**, then **Back to Dashboard**.
+
+#### Step 4 — Create OAuth2 Desktop Credentials
+
+Go to **APIs & Services → Credentials**. Click **+ Create Credentials** at the top and choose **OAuth client ID**. For Application type, select **Desktop app**. Name it something like `payslip-desktop-client`. Click **Create**.
+
+A dialog pops up with your **Client ID** and **Client Secret** — copy these (you'll paste them into the app).
+
+#### Step 5 — First Run
 
 ```bash
 python main.py
 ```
 
-On first launch:
 1. Click **Gmail Settings** in the top bar
 2. Paste your **Client ID** and **Client Secret**
-3. Click **Save Credentials**, then **Test Connection**
-4. A browser window will open for Google OAuth consent — sign in and allow access
+3. Click **Save Credentials**
+4. Click **Test Connection** — a browser window will open asking you to sign in and grant permission
+5. You'll see a scary "Google hasn't verified this app" screen — click **Advanced → Go to [app name] (unsafe)**. This is normal for personal/test apps.
+6. Click **Allow** — the app receives a token which gets saved locally
+7. The connection log should show "Connection Test PASSED"
+
+After that first auth, subsequent runs use the saved token and won't prompt again unless it expires.
+
+> **Tip:** If the token expires or you change scopes, open Gmail Settings, click **Clear Token**, and test again to re-authenticate.
 
 ## Usage
 
